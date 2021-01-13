@@ -1,26 +1,51 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import api from './services/api';
 
 import "./styles.css";
 
+// useEffect => carregar dados
+// useState => salvar dados
 function App() {
+
+  // CARREGANDO DADOS DA API
+  const [repositories, setRepositories] = useState([]);
+  useEffect(() => {
+    api.get('repositories').then(response => {
+      setRepositories(response.data);
+      
+    });
+  }, []);
+
   async function handleAddRepository() {
-    // TODO
+    const response = await api.post('repositories', {
+      title: 'App-show-de-bola-rs',
+      url: 'https://github.com/romuloLim/App-show-de-bola-rs',
+      techs: ['Node', 'ReactJS', 'React Native']
+    })
+
+    setRepositories([...repositories, response.data]);
   }
 
   async function handleRemoveRepository(id) {
-    // TODO
+    api.delete(`repositories/${id}`);
+
+    setRepositories(repositories.filter(
+      repository => repository.id !== id
+    ))
   }
 
   return (
     <div>
       <ul data-testid="repository-list">
-        <li>
-          Repositório 1
-
-          <button onClick={() => handleRemoveRepository(1)}>
-            Remover
-          </button>
-        </li>
+        { repositories.map(repository => (
+                  <li key={repository.title}>
+                  { repository.title }
+        
+                  <button onClick={() => handleRemoveRepository(repository.id)}>
+                    Remover
+                  </button>
+                </li>
+        )) }
       </ul>
 
       <button onClick={handleAddRepository}>Adicionar</button>
